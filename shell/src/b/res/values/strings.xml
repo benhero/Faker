@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Faker B</string>
+    <string name="main_text">I\'m from B!</string>
+</resources>
