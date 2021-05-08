@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'kotlin-android-extensions'
+    id 'walle'
 }
 
 android {
@@ -63,6 +64,15 @@ android {
     }
 }
 
+walle {
+    // 指定渠道包的输出路径
+    apkOutputFolder = new File("${project.buildDir}/outputs/channels")
+    // 定制渠道包的APK的文件名称
+    apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk'
+    // 渠道配置文件
+    channelFile = new File("${project.getProjectDir()}/channel")
+}
+
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -70,6 +80,43 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.meituan.android.walle:library:1.1.7'
 
     implementation project(':shell')
 }
+
+//自定义写入渠道配置信息
+task writeChannel {
+    if (channel != "xx" && channel != null && channel != "") {
+        println("channel:" + channel)
+        String[] channels = channel.split(",")
+        if (channels == null || channels.length == 0) {
+            return
+        }
+        BufferedWriter bw = null
+        try {
+            File file = file("${project.getProjectDir()}/channel")
+            bw = new BufferedWriter(new FileWriter(file))
+            for (String channelName : channels) {
+                if (channelName != null && channelName != "") {
+                    bw.writeLine(channelName)
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace()
+        } finally {
+            try {
+                if (bw == null) {
+                    return
+                }
+                bw.close()
+            } catch (IOException e) {
+                e.printStackTrace()
+            }
+        }
+    }
+}
+//在clean开始编译后调用
+writeChannel.dependsOn clean
+
+// 打包命令 A: gradlew assembleAReleaseChannels ，B: gradlew assembleBReleaseChannels
