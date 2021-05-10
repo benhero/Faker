@@ -50,6 +50,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig android.buildTypes.release.signingConfig // 避免在使用多渠道的时候，Debug模式下使用Android默认Debug签名文件
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
